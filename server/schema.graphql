@@ -21,4 +21,7 @@ type Company {
     id: ID!
     name: String
     description: String
+    #let's add a reverse association now, the company can also have a list of jobs, we will resolve it separately because it doesn't actually exist in the default company schema in the DB.
+    # this btw opens up the world of recursive queries,  like you ask for a friend's list of firends, and then for each friend you ask for their list of friends, and so on. GraphQL can handle that just fine, as long as you don't create an infinite loop.
+    jobs: [Job!] # marking job also as non-null
 }

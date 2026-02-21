@@ -1,17 +1,23 @@
+import { GraphQLError } from "graphql";
 import { getCompany } from "./db/companies.js";
-import { getJob, getJobs } from "./db/jobs.js";
+import { getJob, getJobs, getJobsByCompanyId } from "./db/jobs.js";
 
 // the resolvers always need to match the schema, so we need to have a resolver for each field in the schema.
 export const resolvers = {
     Query: {
         // when job is queried, this function will be executed and the return value will be sent back to the client as a response.
-        job: (parent, args) => {
+        job: async (parent, args) => {
             // the "args" parameter contains the arguments passed to the query, in this case, the "id" argument.
-            return getJob(args.id);
+            const job = await getJob(args.id);
+            if (!job) return customNotFoundError("Job Not Found", args.id);
+            return job;
         },
 
-        company: (parent, args) => {
-            return getCompany(args.id);
+        company: async (parent, args) => {
+            const company = await getCompany(args.id);
+            if (!company)
+                return customNotFoundError("Company Not Found", args.id);
+            return company;
         },
 
         jobs: () => getJobs(),
@@ -24,4 +30,15 @@ export const resolvers = {
         date: (parent) => parent.createdAt.slice(0, "yyyy-mm-dd".length), // we take the "createdAt" field from the parent object (which is the  job object) and slice it to get only the date part (YYYY-MM-DD).
         company: (parent) => getCompany(parent.companyId), // we take the "companyId" field from the parent object (which is the job object) and use it to get the company details from the database using the getCompanyById function.
     },
+
+    // let's resolve the company field for the Job type, so that when we query for a job and ask for the company details, we can get them from the database using the companyId field in the job object.
+    Company: {
+        jobs: (parent) => getJobsByCompanyId(parent.id), // we take the "id" field from the parent object (which is the company object) and use it to get the jobs for that company from the database using the getJobsByCompanyId function.
+    },
 };
+
+function customNotFoundError(message) {
+    const error = new GraphQLError(message);
+    error.extensions = { code: "NOT_FOUND" };
+    return error;
+}
