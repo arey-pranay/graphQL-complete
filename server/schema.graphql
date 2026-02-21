@@ -5,6 +5,9 @@ type Query {
     company(id: ID!): Company
 }
 
+type Mutation {
+    createJob(title: String!, description: String, companyId: ID!): Job
+}
 type Job {
     id: ID! # marking a field as non-nullable with "!" means that this field must always have a value when queried. If a client tries to query this field and it returns null, it will result in an error. So the server must provide ID if client requests it, server can't return null for that
     title: String

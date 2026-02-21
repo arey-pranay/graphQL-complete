@@ -1,6 +1,6 @@
 import { GraphQLError } from "graphql";
 import { getCompany } from "./db/companies.js";
-import { getJob, getJobs, getJobsByCompanyId } from "./db/jobs.js";
+import { getJob, getJobs, getJobsByCompanyId, createJob } from "./db/jobs.js";
 
 // the resolvers always need to match the schema, so we need to have a resolver for each field in the schema.
 export const resolvers = {
@@ -34,6 +34,18 @@ export const resolvers = {
     // let's resolve the company field for the Job type, so that when we query for a job and ask for the company details, we can get them from the database using the companyId field in the job object.
     Company: {
         jobs: (parent) => getJobsByCompanyId(parent.id), // we take the "id" field from the parent object (which is the company object) and use it to get the jobs for that company from the database using the getJobsByCompanyId function.
+    },
+
+    // ----- This was about reading (querying), now let's tell how to write  -----
+
+    Mutation: {
+        createJob: async (parent, args) => {
+            const { title, description, companyId } = args;
+            // In a real app, you would validate the input and check if the company exists.
+            // For now, we'll assume the company exists and is valid.
+            const job = await createJob({ title, description, companyId });
+            return job;
+        },
     },
 };
 
