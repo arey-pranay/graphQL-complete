@@ -1,33 +1,29 @@
+import cors from "cors";
+import express from "express";
+import { authMiddleware, handleLogin } from "./auth.js";
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
-// the below hash (#) comment is for editor and syntax highlighting
-const typeDefs = `#graphql
-    type Query {
-        greeting: String # Greeting is something that can now be queried
-    }
+import { expressMiddleware as apolloExpressMiddleware } from "@as-integrations/express4";
+import { readFile } from "node:fs/promises";
+import { resolvers } from "./resolvers.js";
+// the main learning is about graphql, so let's start with creating an Apollo Server instance.
+const typeDefs = await readFile("./schema.graphql", "utf-8");
 
-    schema{
-        # query(used by the client to query data) is by default of the type Query, but we can explicitly define it here for clarity
-        query: Query # this is the entry point for our queries, it tells the server that when a query is made, it should look at the Query type for the structure of the query
-    }
-`;
-
-const resolvers = {
-    Query: {
-        greeting: () => "Hello, world!", // the value (arrow function in this case) is what will be returned when the greeting query is executed
-    },
-};
-
-// now let's create the server with our type definitions and resolvers
-const server = new ApolloServer({
+const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
 });
+await apolloServer.start();
 
-// let's run the server and listen on port 4000
-const serverPromise = startStandaloneServer(server, {
-    listen: { port: 4000 },
+const app = express(); // creating an Express application. this is our backend application that will handle all the requests and responses.
+app.use(cors(), express.json(), authMiddleware); // middlewares for all requests
+app.use("/graphql", apolloExpressMiddleware(apolloServer)); // middleware for "/graphql" requests
+
+//pair the app to a port and start listening for requests
+const PORT = 9000;
+app.listen({ port: PORT }, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
 });
 
-const { url } = await serverPromise;
-console.log(`Server is running at ${url}`);
+// Authentication route (whenever /login is requested, handleLogin will be called)
+app.post("/login", handleLogin);

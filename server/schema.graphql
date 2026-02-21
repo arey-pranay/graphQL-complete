@@ -1,0 +1,10 @@
+# Query type defines the entry points for read operations in GraphQL. Each field in the Query type corresponds to a function (resolver) that will be executed when that field is queried.
+type Query {
+    job: Job
+}
+
+type Job {
+    id: ID
+    title: String
+    description: String
+}
