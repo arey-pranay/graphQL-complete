@@ -1,10 +1,19 @@
 import { getCompany } from "./db/companies.js";
-import { getJobs } from "./db/jobs.js";
+import { getJob, getJobs } from "./db/jobs.js";
 
 // the resolvers always need to match the schema, so we need to have a resolver for each field in the schema.
 export const resolvers = {
     Query: {
         // when job is queried, this function will be executed and the return value will be sent back to the client as a response.
+        job: (parent, args) => {
+            // the "args" parameter contains the arguments passed to the query, in this case, the "id" argument.
+            return getJob(args.id);
+        },
+
+        company: (parent, args) => {
+            return getCompany(args.id);
+        },
+
         jobs: () => getJobs(),
     },
     //the date field needs to be separately resolved because in this case the DB returns "createdAt" in the ISO format, not "date"
