@@ -1,10 +1,22 @@
 # Query type defines the entry points for read operations in GraphQL. Each field in the Query type corresponds to a function (resolver) that will be executed when that field is queried.
 type Query {
-    job: Job
+    jobs: [Job!] # marking job also ass non-nullable, so that the returned array never allows any null value in it.
 }
 
 type Job {
-    id: ID
+    id: ID! # marking a field as non-nullable with "!" means that this field must always have a value when queried. If a client tries to query this field and it returns null, it will result in an error. So the server must provide ID if client requests it, server can't return null for that
     title: String
+    description: String
+    #this is how you write a documentation comment. You can use markdown in it, and this comment can be read by developers who want to use your API.
+    """
+    we could also create our own scalar for Date, but since we want our API to be usable by any client, we may want to avoid that.
+    """
+    date: String
+    company: Company
+}
+
+type Company {
+    id: ID!
+    name: String
     description: String
 }
