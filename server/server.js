@@ -5,6 +5,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware as apolloExpressMiddleware } from "@as-integrations/express4";
 import { readFile } from "node:fs/promises";
 import { resolvers } from "./resolvers.js";
+import { getUser } from "./db/users.js";
 // the main learning is about graphql, so let's start with creating an Apollo Server instance.
 const typeDefs = await readFile("./schema.graphql", "utf-8");
 
@@ -30,6 +31,10 @@ app.listen({ port: PORT }, () => {
 // Authentication route (whenever /login is requested, handleLogin will be called)
 app.post("/login", handleLogin);
 
-function getContext({ req }) {
-    return { auth: req.auth };
+async function getContext({ req }) {
+    if (req.auth) {
+        let user = await getUser(req.auth.sub);
+        return { user };
+    }
+    return {};
 }

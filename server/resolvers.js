@@ -54,18 +54,45 @@ export const resolvers = {
         // the third parameter is the context, you can have stuff like headers and tokens etc etc
         createJobMutation: (
             parent,
-            { input: { title, description, companyId } }, // nice destructuring used here to get the title, description and companyId from the input argument of the createJobMutation, which is an object that contains these fields. This way we can directly use these variables in the createJob function without having to access them through the input object.
-            { auth },
+            { input: { title, description } }, // nice destructuring used here to get the title, description and companyId from the input argument of the createJobMutation, which is an object that contains these fields. This way we can directly use these variables in the createJob function without having to access them through the input object.
+            { user },
         ) => {
-            if (!auth) {
+            if (!user) {
                 throw unauthorizedError("Missing authentication");
             }
-            createJob({ title, description, companyId });
+            return createJob({ title, description, companyId: user.companyId });
         },
-        deleteJobMutation: (parent, { id }) => deleteJob(id),
-
-        updateJobMutation: (parent, { input: { id, title, description } }) =>
-            updateJob({ id, title, description }),
+        deleteJobMutation: async (_root, { id }, { user }) => {
+            if (!user) {
+                throw unauthorizedError("Missing authentication");
+            }
+            const job = await deleteJob(id, user.companyId);
+            if (!job) {
+                throw customNotFoundError(
+                    "No Job found with id " + id + " in your company ",
+                );
+            }
+            return job;
+        },
+        updateJobMutation: async (
+            _root,
+            { input: { id, title, description } },
+            { user },
+        ) => {
+            if (!user) {
+                throw unauthorizedError("Missing authentication");
+            }
+            const job = await updateJob({
+                id,
+                companyId: user.companyId,
+                title,
+                description,
+            });
+            if (!job) {
+                throw customNotFoundError("No Job found with id " + id);
+            }
+            return job;
+        },
     },
 };
 

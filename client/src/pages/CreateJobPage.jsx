@@ -5,16 +5,27 @@ import { useNavigate } from "react-router";
 function CreateJobPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const res = await createJob({
-            title,
-            description,
-            companyId: "Gu7QW9LcnF5d",
-        });
-        console.log(res);
-        navigate(`/jobs/${res.id}`);
+        setError("");
+        try {
+            const res = await createJob({
+                title,
+                description,
+            });
+            navigate(`/jobs/${res.id}`);
+        } catch (error) {
+            let message = "error message";
+
+            if (error.response?.errors?.length) {
+                message = error.response.errors[0].message;
+            } else if (error.message) {
+                message = error.message;
+            }
+            setError(message);
+        }
     };
 
     return (
@@ -60,6 +71,7 @@ function CreateJobPage() {
                     </div>
                 </form>
             </div>
+            {error && <h4>{error}</h4>}
         </div>
     );
 }

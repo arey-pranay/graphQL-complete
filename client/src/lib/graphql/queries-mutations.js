@@ -1,6 +1,15 @@
 // create client side queries to fetch the current user's profile information
 import { gql, GraphQLClient } from "graphql-request";
-const client = new GraphQLClient("http://localhost:9000/graphql");
+import { getAccessToken } from "../auth";
+const client = new GraphQLClient("http://localhost:9000/graphql", {
+    headers: () => {
+        const accessToken = getAccessToken();
+        if (accessToken) {
+            return { Authorization: `Bearer ${accessToken}` }; // extra info:: http header keys are case-insensitive
+        }
+        return {};
+    },
+});
 
 export async function getJobs() {
     const query = gql`
@@ -60,7 +69,6 @@ export async function getCompany(id) {
 
 export async function createJob(input) {
     console.log("function-----createJob called with input:");
-    console.log(input);
     const mutation = gql`
         mutation ($input: CreateJobInput!) {
             createJobMutation(input: $input) {
