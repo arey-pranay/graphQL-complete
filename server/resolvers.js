@@ -49,12 +49,19 @@ export const resolvers = {
         // In a real app, you would validate the input and check if the company exists.
         // For now, we'll assume the company exists and is valid.
 
-        // nice destructuring used here to get the title, description and companyId from the input argument of the createJobMutation, which is an object that contains these fields. This way we can directly use these variables in the createJob function without having to access them through the input object.
+        // the first parameter is the parent (in this case,the root).
+        // the second parameter is the object of user arguments.
+        // the third parameter is the context, you can have stuff like headers and tokens etc etc
         createJobMutation: (
             parent,
-            { input: { title, description, companyId } },
-        ) => createJob({ title, description, companyId }),
-
+            { input: { title, description, companyId } }, // nice destructuring used here to get the title, description and companyId from the input argument of the createJobMutation, which is an object that contains these fields. This way we can directly use these variables in the createJob function without having to access them through the input object.
+            { auth },
+        ) => {
+            if (!auth) {
+                throw unauthorizedError("Missing authentication");
+            }
+            createJob({ title, description, companyId });
+        },
         deleteJobMutation: (parent, { id }) => deleteJob(id),
 
         updateJobMutation: (parent, { input: { id, title, description } }) =>
@@ -66,4 +73,10 @@ function customNotFoundError(message) {
     const error = new GraphQLError(message);
     error.extensions = { code: "NOT_FOUND" };
     return error;
+}
+
+function unauthorizedError(message) {
+    return new GraphQLError(message, {
+        extensions: { code: "UNAUTHORIZED" },
+    });
 }

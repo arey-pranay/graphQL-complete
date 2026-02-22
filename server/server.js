@@ -16,8 +16,10 @@ await apolloServer.start();
 
 const app = express(); // creating an Express application. this is our backend application that will handle all the requests and responses.
 app.use(cors(), express.json(), authMiddleware); // middlewares for all requests
-app.use("/graphql", apolloExpressMiddleware(apolloServer)); // middleware for "/graphql" requests
-
+app.use(
+    "/graphql",
+    apolloExpressMiddleware(apolloServer, { context: getContext }),
+); // middleware for "/graphql" requests
 //pair the app to a port and start listening for requests
 const PORT = 9000;
 app.listen({ port: PORT }, () => {
@@ -27,3 +29,7 @@ app.listen({ port: PORT }, () => {
 
 // Authentication route (whenever /login is requested, handleLogin will be called)
 app.post("/login", handleLogin);
+
+function getContext({ req }) {
+    return { auth: req.auth };
+}
