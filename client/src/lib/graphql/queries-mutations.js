@@ -57,3 +57,42 @@ export async function getCompany(id) {
     const response = await client.request(query, { id });
     return response.company;
 }
+
+export async function createJob(input) {
+    console.log("function-----createJob called with input:");
+    console.log(input);
+    const mutation = gql`
+        mutation ($input: CreateJobInput!) {
+            createJobMutation(input: $input) {
+                id # this is  the field we will be needing from the mutation response, we need the id of the newly created job to be able to navigate to the job page after creating the job.
+            }
+        }
+    `;
+    const response = await client.request(mutation, { input });
+    return response.createJobMutation;
+}
+
+export async function deleteJob(id) {
+    const mutation = gql`
+        mutation ($id: ID!) {
+            deleteJobMutation(id: $id) {
+                title # we can return any field from the deleted job, but we need to return something to confirm that the deletion was successful. Returning the title is just an example, you can return any field you want.
+            }
+        }
+    `;
+    const response = await client.request(mutation, { id });
+    return response.deleteJobMutation;
+}
+
+export async function updateJob(input) {
+    const mutation = gql`
+        mutation ($input: UpdateJobInput!) {
+            updateJobMutation(input: $input) {
+                title
+            }
+        }
+    `;
+    // destructuring the input and sending is a nice shortcut key step
+    const response = await client.request(mutation, { input });
+    return response.updateJobMutation;
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { getCompany } from "../lib/graphql/queries";
+import { deleteJob, getCompany } from "../lib/graphql/queries-mutations";
 
 function CompanyPage() {
     const { companyId } = useParams();
@@ -37,6 +37,31 @@ function CompanyPage() {
         fetchCompany();
     }, [companyId]);
     const { company, loading, error } = pageState;
+    const handleDeleteJob = async (jobId) => {
+        try {
+            await deleteJob(jobId);
+            // After deleting the job, we need to update the company data to reflect the change. We can do this by refetching the company data.
+            const updatedCompany = await getCompany(companyId);
+            setPageState({
+                company: updatedCompany,
+                loading: false,
+                error: null,
+            });
+        } catch (error) {
+            let message = "Failed to delete job";
+
+            if (error.response?.errors?.length) {
+                message = error.response.errors[0].message;
+            } else if (error.message) {
+                message = error.message;
+            }
+
+            setPageState((prevState) => ({
+                ...prevState,
+                error: message,
+            }));
+        }
+    };
     if (loading) {
         return <p>Loading...</p>;
     }
@@ -53,7 +78,15 @@ function CompanyPage() {
                     <h2 className="subtitle">Jobs at {company.name}</h2>
                     <ul>
                         {company.jobs.map((job) => (
-                            <li key={job.id}>{job.title}</li>
+                            <div key={job.id} className="">
+                                <li key={job.id}>{job.title}</li>
+                                <button
+                                    onClick={() => handleDeleteJob(job.id)}
+                                    className="button is-danger"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         ))}
                     </ul>
                 </div>

@@ -1,6 +1,13 @@
 import { GraphQLError } from "graphql";
 import { getCompany } from "./db/companies.js";
-import { getJob, getJobs, getJobsByCompanyId, createJob } from "./db/jobs.js";
+import {
+    getJob,
+    getJobs,
+    getJobsByCompanyId,
+    createJob,
+    deleteJob,
+    updateJob,
+} from "./db/jobs.js";
 
 // the resolvers always need to match the schema, so we need to have a resolver for each field in the schema.
 export const resolvers = {
@@ -39,14 +46,19 @@ export const resolvers = {
     // ----- This was about reading (querying), now let's tell how to write  -----
 
     Mutation: {
-        createJobMutation: async (parent, args) => {
-            const { input } = args;
-            const { title, description, companyId } = input;
-            // In a real app, you would validate the input and check if the company exists.
-            // For now, we'll assume the company exists and is valid.
-            const job = await createJob({ title, description, companyId });
-            return job;
-        },
+        // In a real app, you would validate the input and check if the company exists.
+        // For now, we'll assume the company exists and is valid.
+
+        // nice destructuring used here to get the title, description and companyId from the input argument of the createJobMutation, which is an object that contains these fields. This way we can directly use these variables in the createJob function without having to access them through the input object.
+        createJobMutation: (
+            parent,
+            { input: { title, description, companyId } },
+        ) => createJob({ title, description, companyId }),
+
+        deleteJobMutation: (parent, { id }) => deleteJob(id),
+
+        updateJobMutation: (parent, { input: { id, title, description } }) =>
+            updateJob({ id, title, description }),
     },
 };
 

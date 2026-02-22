@@ -25,3 +25,12 @@ we can also use a code-first approach where the resolver is written at the same 
 ### Schema
 
 ![alt text](image.png)
+
+### Steps:
+
+Add your query or mutation in schema
+Create a resolver for your q or m
+Create a DB-interacting utility function to call in your resolver
+Go to sandbox and create a valid request
+Go to frontend, create a client call for that resolver in your queries-mutations file and put the request
+Call the frontend utility function wherever needed
