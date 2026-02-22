@@ -6,7 +6,7 @@ type Query {
 }
 
 type Mutation {
-    createJob(title: String!, description: String, companyId: ID!): Job
+    createJobMutation(input: CreateJobInput!): Job
 }
 type Job {
     id: ID! # marking a field as non-nullable with "!" means that this field must always have a value when queried. If a client tries to query this field and it returns null, it will result in an error. So the server must provide ID if client requests it, server can't return null for that
@@ -27,4 +27,10 @@ type Company {
     #let's add a reverse association now, the company can also have a list of jobs, we will resolve it separately because it doesn't actually exist in the default company schema in the DB.
     # this btw opens up the world of recursive queries,  like you ask for a friend's list of firends, and then for each friend you ask for their list of friends, and so on. GraphQL can handle that just fine, as long as you don't create an infinite loop.
     jobs: [Job!] # marking job also as non-null
+}
+
+input CreateJobInput {
+    title: String!
+    description: String
+    companyId: ID
 }

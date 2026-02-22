@@ -39,8 +39,9 @@ export const resolvers = {
     // ----- This was about reading (querying), now let's tell how to write  -----
 
     Mutation: {
-        createJob: async (parent, args) => {
-            const { title, description, companyId } = args;
+        createJobMutation: async (parent, args) => {
+            const { input } = args;
+            const { title, description, companyId } = input;
             // In a real app, you would validate the input and check if the company exists.
             // For now, we'll assume the company exists and is valid.
             const job = await createJob({ title, description, companyId });
