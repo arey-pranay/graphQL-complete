@@ -1,5 +1,4 @@
 // create client side queries to fetch the current user's profile information
-import { GraphQLClient } from "graphql-request";
 import { getAccessToken } from "../auth";
 import {
     ApolloClient,
@@ -9,15 +8,6 @@ import {
     createHttpLink,
     gql,
 } from "@apollo/client";
-const client = new GraphQLClient("http://localhost:9000/graphql", {
-    headers: () => {
-        const accessToken = getAccessToken();
-        if (accessToken) {
-            return { Authorization: `Bearer ${accessToken}` }; // extra info:: http header keys are case-insensitive
-        }
-        return {};
-    },
-});
 const httpLink = createHttpLink({ uri: "http://localhost:9000/graphql" });
 const authLink = new ApolloLink((operation, forward) => {
     const accessToken = getAccessToken();
@@ -121,8 +111,12 @@ export async function deleteJob(id) {
             }
         }
     `;
-    const response = await client.request(mutation, { id });
-    return response.deleteJobMutation;
+
+    const response = await apolloClient.mutate({
+        mutation,
+        variables: { id },
+    });
+    return response.data.deleteJobMutation;
 }
 
 export async function updateJob(input) {
@@ -134,6 +128,9 @@ export async function updateJob(input) {
         }
     `;
     // destructuring the input and sending is a nice shortcut key step
-    const response = await client.request(mutation, { input });
-    return response.updateJobMutation;
+    const response = await apolloClient.mutate({
+        mutation,
+        variables: { input },
+    });
+    return response.data.updateJobMutation;
 }
