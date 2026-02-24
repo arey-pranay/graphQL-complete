@@ -1,21 +1,19 @@
 import { useState } from "react";
-import { createJob } from "../lib/graphql/queries-mutations";
 import { useNavigate } from "react-router";
-
+import { useCreateJob } from "../lib/graphql/hooks";
+import { useMutation } from "@apollo/client";
 function CreateJobPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { createJob, loading } = useCreateJob();
     const handleSubmit = async (event) => {
         event.preventDefault();
         setError("");
         try {
-            const res = await createJob({
-                title,
-                description,
-            });
-            navigate(`/jobs/${res.id}`);
+            const job = await createJob(title, description);
+            navigate(`/jobs/${job.id}`);
         } catch (error) {
             let message = "error message";
 
@@ -64,6 +62,7 @@ function CreateJobPage() {
                             <button
                                 className="button is-link"
                                 onClick={handleSubmit}
+                                disabled={loading}
                             >
                                 Submit
                             </button>

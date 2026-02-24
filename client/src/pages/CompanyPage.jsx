@@ -1,66 +1,11 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { deleteJob, getCompany } from "../lib/graphql/queries-mutations";
-
+import { deleteJob } from "../lib/graphql/queries-mutations";
+import { useCompany } from "../lib/graphql/hooks";
 function CompanyPage() {
     const { companyId } = useParams();
-    const [pageState, setPageState] = useState({
-        company: null,
-        loading: true,
-        error: null,
-    });
-    useEffect(() => {
-        async function fetchCompany() {
-            try {
-                const company = await getCompany(companyId);
-                setPageState({
-                    company,
-                    loading: false,
-                    error: null,
-                });
-            } catch (error) {
-                let message = "Failed to fetch company";
-
-                if (error.response?.errors?.length) {
-                    message = error.response.errors[0].message;
-                } else if (error.message) {
-                    message = error.message;
-                }
-
-                setPageState({
-                    company: null,
-                    loading: false,
-                    error: message,
-                });
-            }
-        }
-        fetchCompany();
-    }, [companyId]);
-    const { company, loading, error } = pageState;
+    const { company, loading, error } = useCompany(companyId);
     const handleDeleteJob = async (jobId) => {
-        try {
-            await deleteJob(jobId);
-            // After deleting the job, we need to update the company data to reflect the change. We can do this by refetching the company data.
-            const updatedCompany = await getCompany(companyId);
-            setPageState({
-                company: updatedCompany,
-                loading: false,
-                error: null,
-            });
-        } catch (error) {
-            let message = "Failed to delete job";
-
-            if (error.response?.errors?.length) {
-                message = error.response.errors[0].message;
-            } else if (error.message) {
-                message = error.message;
-            }
-
-            setPageState((prevState) => ({
-                ...prevState,
-                error: message,
-            }));
-        }
+        await deleteJob(jobId);
     };
     if (loading) {
         return <p>Loading...</p>;
