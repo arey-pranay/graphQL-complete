@@ -82,6 +82,7 @@ export const createJobMutation = gql`
     ${jobDetailsFragment}
 `;
 
+// bonus functions: can be turned into hooks
 export async function deleteJob(id) {
     const mutation = gql`
         mutation ($id: ID!) {

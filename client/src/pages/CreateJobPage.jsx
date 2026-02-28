@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useCreateJob } from "../lib/graphql/hooks";
-import { useMutation } from "@apollo/client";
 function CreateJobPage() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
